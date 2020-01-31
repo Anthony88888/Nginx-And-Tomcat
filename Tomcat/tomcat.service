@@ -1,5 +1,5 @@
 #Tomcat systemctl script 
-#暂时只能使用root的方式启动,请配置好启动脚本的jdk变量,两种启动的方式可以自己任意切换.
+#暂时只能使用root的方式启动,请配置好启动脚本的jdk变量,两种启动的方式可以自己任意切换!
 
 [Unit]
 Description=Tomcat-8.5.42
