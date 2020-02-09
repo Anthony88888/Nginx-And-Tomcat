@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>chapter009-04-Nginx中的rewrite功能.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h2 id="%E7%AC%AC%E4%B9%9D%E7%AB%A0-nginx-%E6%9C%8D%E5%8A%A1%E5%99%A8">第九章 Nginx 服务器</h2>
+<h3 id="%E7%AC%AC%E5%9B%9B%E8%8A%82-nginx-%E4%B8%AD%E7%9A%84-rewrite-%E5%8A%9F%E8%83%BD">第四节  Nginx 中的 rewrite 功能</h3>
+<h4 id="941-centos76-%E4%B8%AD%E5%87%86%E5%A4%87%E4%B8%80%E4%B8%AA%E7%BC%96%E8%AF%91%E7%9A%84-nginx-%E7%8E%AF%E5%A2%83">9.4.1 CentOS7.6 中准备一个编译的 Nginx 环境</h4>
+<pre class="hljs"><code><div>我们编译安装一个 Nginx 1.16 版本，方便进行下面的 rewrite 实验
+
+1. 删除之前在 /apps/ 下的 nginx 文件夹， /data 和 /var/www 文件夹
+[root@localhost ~]<span class="hljs-comment"># rm -rf /apps/nginx/</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># rm -rf /data</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># rm -rf /var/www</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+
+2. 回到之前的 nginx 编译文件夹， 重新安装一次已编译好的 nginx
+[root@localhost ~]<span class="hljs-comment"># cd nginx-1.16.0/</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># make install</span>
+make -f objs/Makefile install
+make[1]: Entering directory /root/nginx-1.16.0
+<span class="hljs-built_in">test</span> -d /apps/nginx || mkdir -p /apps/nginx
+<span class="hljs-built_in">test</span> -d /apps/nginx/sbin \
+	|| mkdir -p /apps/nginx/sbin
+<span class="hljs-built_in">test</span> ! -f /apps/nginx/sbin/nginx \
+	|| mv /apps/nginx/sbin/nginx \
+		/apps/nginx/sbin/nginx.old
+cp objs/nginx /apps/nginx/sbin/nginx
+.
+.
+.省略部分安装输出信息
+.
+.
+<span class="hljs-built_in">test</span> -d /apps/nginx/logs \
+	|| mkdir -p /apps/nginx/logs
+<span class="hljs-built_in">test</span> -d /apps/nginx/html \
+	|| cp -R html /apps/nginx
+<span class="hljs-built_in">test</span> -d /apps/nginx/logs \
+	|| mkdir -p /apps/nginx/logs
+make[1]: Leaving directory /root/nginx-1.16.0
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># cd</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># echo "default nginx page" &gt; /apps/nginx/html/index.html </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># ss -ntl</span>
+State      Recv-Q Send-Q                       Local Address:Port                                      Peer Address:Port              
+LISTEN     0      128                                      *:111                                                  *:*                  
+LISTEN     0      128                                      *:80                                                   *:*                  
+LISTEN     0      128                                      *:22                                                   *:*                  
+LISTEN     0      100                              127.0.0.1:25                                                   *:*                  
+LISTEN     0      128                                     :::111                                                 :::*                  
+LISTEN     0      128                                     :::22                                                  :::*                  
+LISTEN     0      100                                    ::1:25                                                  :::*                  
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<h4 id="942-nginx-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8-if-%E5%88%A4%E6%96%AD%E5%8A%9F%E8%83%BD">9.4.2 Nginx 配置文件中使用 if 判断功能</h4>
+<pre class="hljs"><code><div>1. nginx 的配置文件中支持 <span class="hljs-keyword">if</span> 条件判断功能，当满足条件时实现特定的配置或者功能，下面我们使用 <span class="hljs-built_in">echo</span> 演示一下
+   下面我们修改一下 nginx 默认的主配置文件，location 中添加一个 <span class="hljs-keyword">if</span> 判断语句块，如果请求协议为 http，则
+   执行 <span class="hljs-built_in">echo</span> 语句
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+	
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> = http ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"request use  http protocol"</span>;
+	    }
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+request use  http protocol
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+下面我将 <span class="hljs-keyword">if</span> 语句中的等号 “=”, 改为 “!=” , 由于 nginx 的 scheme 为 http 所以判断不匹配，没有
+进行 <span class="hljs-built_in">echo</span> 语句的执行，所以返回默认页面
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep scheme</span>
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> != http ){
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+下面我们演示一下使用正则表达式区分和不区分大小写进行匹配
+
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep scheme</span>
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> ~ HTTP ){
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep scheme</span>
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> ~* HTTP ){
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+request use  http protocol
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+同样使用正则表达式时，也可以使用叹号 <span class="hljs-string">"!"</span> 取反
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep scheme</span>
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> !~ HTTP ){
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+request use  http protocol
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep scheme</span>
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> !~* HTTP ){
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+下面我们使用一下 -f 来判断指定文件是否存在
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 1 if</span>
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -f /apps/nginx/html/index.html ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" index.html page is in the /apps/nginx/html/index.html"</span>;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+ index.html page is <span class="hljs-keyword">in</span> the /apps/nginx/html/index.html
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 1 if</span>
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( !-f /apps/nginx/html/index.html ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" index.html page is in the /apps/nginx/html/index.html"</span>;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+使用 -d 选项判断指定的文件夹是否存在
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -d /app/nginx ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" nginx working dir is /apps/nginx"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -d /apps/nginx ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" nginx working dir is /apps/nginx"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+ nginx working dir is /apps/nginx
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+判断指定文件是否具有可执行权限
+
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -x /apps/nginx/html/index.html ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" index.html can not exec"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># ls -al /apps/nginx/html/index.html </span>
+-rw-r--r-- 1 root root 19 Oct 11 14:28 /apps/nginx/html/index.html
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( !-x /apps/nginx/html/index.html ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">" index.html can not exec"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+ index.html can not <span class="hljs-built_in">exec</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+使用 -e 选项判断指定文件、目录、软连接文件是否存在
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -e  /bin ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"/bin is a symbolic"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+/bin is a symbolic
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( -e  /magedu ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"/bin is a symbolic"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-keyword">if</span> ( !-e  /magedu ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"wo do not have /magedu dir"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+wo <span class="hljs-keyword">do</span> not have /magedu dir
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+<span class="hljs-keyword">if</span> 中的判断条件为字符串时结果为 <span class="hljs-literal">true</span>，字符串为空时结果为 <span class="hljs-literal">false</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+	    
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> <span class="hljs-string">"magedu"</span>;
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$magedu</span> ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"string is true"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+string is <span class="hljs-literal">true</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep -C 2 if</span>
+	    
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> <span class="hljs-string">""</span>;
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$magedu</span> ){
+		   <span class="hljs-built_in">echo</span> <span class="hljs-string">"string is true"</span>;
+	    }
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+default nginx page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<h4 id="943-nginx-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8-break-%E5%8A%9F%E8%83%BD">9.4.3 Nginx 配置文件中使用 break 功能</h4>
+<pre class="hljs"><code><div>1. 使用 <span class="hljs-built_in">break</span> 配置，<span class="hljs-built_in">break</span> 之后的内容将不再生效
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> linux;
+	    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> python;
+            <span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+python
+python
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> linux;
+	    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+            <span class="hljs-built_in">break</span>;
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> python;
+            <span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+linux
+linux
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<h4 id="944-nginx-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8-return-%E5%8A%9F%E8%83%BD">9.4.4 Nginx 配置文件中使用 return 功能</h4>
+<pre class="hljs"><code><div>1. 使用 <span class="hljs-built_in">return</span> 返回指定的 http 状态码
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+            <span class="hljs-built_in">return</span> 777;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -I 127.0.0.1</span>
+HTTP/1.1 777 
+Server: nginx/1.16.0
+Date: Fri, 11 Oct 2019 08:44:54 GMT
+Content-Length: 0
+Connection: keep-alive
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+
+2. 在上面的基础上，我们添加返回的具体页面信息内容
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+            <span class="hljs-built_in">return</span> 777 <span class="hljs-string">"&lt;h1&gt;welcome to magedu&lt;/h1&gt;\n"</span>;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl  127.0.0.1</span>
+&lt;h1&gt;welcome to magedu&lt;/h1&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -I 127.0.0.1</span>
+HTTP/1.1 777 
+Server: nginx/1.16.0
+Date: Fri, 11 Oct 2019 08:47:41 GMT
+Content-Type: application/octet-stream
+Content-Length: 27
+Connection: keep-alive
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+</div></code></pre>
+<h4 id="945-nginx-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BD%BF%E7%94%A8-rewrite-%E5%8A%9F%E8%83%BD">9.4.5 Nginx 配置文件中使用 rewrite 功能</h4>
+<pre class="hljs"><code><div>1. 下面我们使用 rewrite 和 redirect 标识，将访问 / 的请求临时重定向到 127.0.0.1/new.html 中
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat  /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+	    rewrite / 127.0.0.1/new.html redirect;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl  127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;302 Found&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;302 Found&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl  -I 127.0.0.1</span>
+HTTP/1.1 302 Moved Temporarily
+Server: nginx/1.16.0
+Date: Fri, 11 Oct 2019 09:05:52 GMT
+Content-Type: text/html
+Content-Length: 145
+Connection: keep-alive
+Location: 127.0.0.1/new.html
+
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+2. 下面我们使用 rewrite 和 permanent 标识，将访问 / 的请求 永久重定向到 127.0.0.1/new.html 中
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat  /apps/nginx/conf/nginx.conf | grep rewrite</span>
+	    rewrite / 127.0.0.1/new.html permanent;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;301 Moved Permanently&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;301 Moved Permanently&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -I 127.0.0.1</span>
+HTTP/1.1 301 Moved Permanently
+Server: nginx/1.16.0
+Date: Fri, 11 Oct 2019 09:09:21 GMT
+Content-Type: text/html
+Content-Length: 169
+Connection: keep-alive
+Location: 127.0.0.1/new.html
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+3. rewrite 中一共有四种标识符，上面我们演示了 redirect 和 permanent,下面我们介绍一下 <span class="hljs-built_in">break</span> 和 last.
+   rewrite 在使用中有时会发生连续跳转，如果使用 <span class="hljs-built_in">break</span> 则会终止 rewrite 模板，后面的跳转不再生效
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># mkdir -pv /apps/nginx/html/dir{1,2}</span>
+mkdir: created directory ‘/apps/nginx/html/dir1’
+mkdir: created directory ‘/apps/nginx/html/dir2’
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># echo "dir1 page" &gt; /apps/nginx/html/dir1/dir1.html</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># echo "dir2 page" &gt; /apps/nginx/html/dir2/dir2.html</span>
+[root@localhost ~]<span class="hljs-comment">#    </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+	    rewrite / /dir1/dir1.html;
+        }
+
+	location /dir1 {
+		root html;
+		index index.html index.html;
+		rewrite /dir1 /dir2/dir2.html;
+	}
+
+	location /dir2 {
+		root html;
+		index index.html index.html;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+dir2 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+dir2 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+dir2 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+下面我们修改一下第一个 location 的 rewrite，在其后添加 <span class="hljs-built_in">break</span>
+
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep break</span>
+	    rewrite / /dir1/dir1.html <span class="hljs-built_in">break</span>;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+dir2 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+dir2 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+dir1 page
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+<span class="hljs-built_in">break</span> 除了可以禁止连续跳转外，开可以结束 <span class="hljs-built_in">break</span> 下的其他配置
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+            <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> linux;
+	    rewrite / /dir1/dir1.html;
+	    <span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> python;
+            <span class="hljs-built_in">echo</span> <span class="hljs-string">"<span class="hljs-variable">$magedu</span> basic localtion"</span>;
+        }
+
+	location /dir1 {
+		root html;
+		index index.html index.html;
+		rewrite /dir1 /dir2/dir2.html;
+	}
+
+	location /dir2 {
+		root html;
+		index index.html index.html;
+		<span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+python
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+下面我们添加一下 <span class="hljs-built_in">break</span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep break</span>
+	    rewrite / /dir1/dir1.html <span class="hljs-built_in">break</span>;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1 </span>
+linux basic localtion
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+
+相对于 <span class="hljs-built_in">break</span> 结束连续 rewrite 跳转，last 仅结束当前配置文件的后续配置，然后可以进行连续跳转
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep last</span>
+	    rewrite / /dir1/dir1.html last;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+linux
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+4. rewrite 连续跳转次数默认为10次，超过后汇报 500 错误
+
+
+5. 我们可以开启 rewrite_log 功能， 我们在 server 配置段中添加启用 rewrite_log 功能，同时要将 error_log 配置为 notice 级别
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep rewrite_log</span>
+	rewrite_log on;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep error_log</span>
+    error_log  logs/error.log  notice; 
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir2/dir2.html</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1/dir1</span>
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+linux
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># tail /apps/nginx/logs/error.log </span>
+2019/10/11 18:18:30 [warn] 14154<span class="hljs-comment">#0: *1 using uninitialized "magedu" variable, client: 127.0.0.1, server: localhost, request: "GET /dir2/dir2.html HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:34 [notice] 14154<span class="hljs-comment">#0: *2 "/dir1" matches "/dir1", client: 127.0.0.1, server: localhost, request: "GET /dir1 HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:34 [notice] 14154<span class="hljs-comment">#0: *2 rewritten data: "/dir2/dir2.html", args: "", client: 127.0.0.1, server: localhost, request: "GET /dir1 HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:34 [warn] 14154<span class="hljs-comment">#0: *2 using uninitialized "magedu" variable, client: 127.0.0.1, server: localhost, request: "GET /dir1 HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:36 [notice] 14154<span class="hljs-comment">#0: *3 "/" matches "/", client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:36 [notice] 14154<span class="hljs-comment">#0: *3 rewritten data: "/dir1/dir1.html", args: "", client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:36 [notice] 14154<span class="hljs-comment">#0: *3 "/dir1" matches "/dir1/dir1.html", client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "127.0.0.1"</span>
+2019/10/11 18:18:36 [notice] 14154<span class="hljs-comment">#0: *3 rewritten data: "/dir2/dir2.html", args: "", client: 127.0.0.1, server: localhost, request: "GET / HTTP/1.1", host: "127.0.0.1"</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+</div></code></pre>
+<h4 id="946-nginx-rewrite-%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B%E5%92%8C%E9%98%B2%E7%9B%97%E9%93%BE">9.4.6 Nginx  rewrite 使用案例和防盗链</h4>
+<pre class="hljs"><code><div>1. http 自动跳转 https， 我们在指定的 location 中添加 <span class="hljs-variable">$scheme</span> 的判断，如果为 http，则 rerwrite 到 htts 请求
+   配置如下图演示：
+
+<span class="hljs-keyword">if</span> ( <span class="hljs-variable">$scheme</span> = http ){
+    rewrite / https://www.magedu.com permanent;
+}
+
+
+
+
+2. 当用户请求的文件不存在时使用 rewrite 进行跳转，代替 404 功能
+   在 location 中判断 <span class="hljs-variable">$request_filename</span> 是否存在即可，配置如下:
+
+<span class="hljs-keyword">if</span> ( !-f <span class="hljs-variable">$request_filename</span>){
+    rewrite / http://www.magedu.top permanent;
+}
+
+
+
+
+3. 防盗链技术，nginx 判断请求头中是否有 valid_referers 匹配的信息，然后使用 <span class="hljs-keyword">if</span> 判断，对不符合
+   要求的请求进行 <span class="hljs-built_in">return</span> 403 处理
+
+[root@localhost ~]<span class="hljs-comment"># vi /etc/hosts</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /etc/hosts</span>
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+127.0.0.1   www.magedu.com
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># ping www.magedu.com</span>
+PING www.magedu.com (127.0.0.1) 56(84) bytes of data.
+64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.085 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.037 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=3 ttl=64 time=0.047 ms
+^C
+--- www.magedu.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2000ms
+rtt min/avg/max/mdev = 0.037/0.056/0.085/0.021 ms
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    error_log  logs/error.log  notice; 
+    server {
+        listen       80;
+        server_name  www.magedu.com;
+	
+        location / {
+            root   html;
+            index  index.html index.htm;
+	    valid_referers server_names;
+
+	    <span class="hljs-keyword">if</span> ( <span class="hljs-variable">$invalid_referer</span> ){
+                <span class="hljs-built_in">return</span> 403;
+            }
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.com" www.magedu.com</span>
+* About to connect() to www.magedu.com port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to www.magedu.com (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: www.magedu.com
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.com
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sat, 12 Oct 2019 10:20:04 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host www.magedu.com left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.org" www.magedu.com</span>
+* About to connect() to www.magedu.com port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to www.magedu.com (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: www.magedu.com
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.org
+&gt; 
+&lt; HTTP/1.1 403 Forbidden
+&lt; Server: nginx/1.16.0
+&lt; Date: Sat, 12 Oct 2019 10:20:13 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 153
+&lt; Connection: keep-alive
+&lt; 
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Connection <span class="hljs-comment">#0 to host www.magedu.com left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+valid_referers 的 none 代表 http 请求头中没有 Referer ， blocked 代表 http 请求头中包含 Referer 但是其值为空 或者 其值不是以 http:// 和 https:// 开头， 
+                  server_names 代表 Referer 中包含主机名，
+                  使用指定的字符串和 Referer 进行匹配，可以使用一个星号 “*” 在该字符串前或者后表示以该字符串开头或者结尾
+                  最后一种使用正则表达式和 Referer 中http:// 或者 https:// 之后的字符串进行匹配，该字符串要以 ~ 符开始。
+
+
+下面我们把 none 加上
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep none</span>
+	    valid_referers none server_names;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v  127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 03:48:08 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.com
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 03:47:48 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.linux.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.linux.com
+&gt; 
+&lt; HTTP/1.1 403 Forbidden
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 03:47:36 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 153
+&lt; Connection: keep-alive
+&lt; 
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+
+
+我们把 none 替换成 blocked
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep blocked</span>
+	    valid_referers blocked server_names;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl   127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e ""  127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: 
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 03:55:31 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+下面我们把 blocked 换成 *.magedu.io
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep server_names</span>
+	    valid_referers server_names *.magedu.io;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.com
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:12:14 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.org" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.org
+&gt; 
+&lt; HTTP/1.1 403 Forbidden
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:12:40 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 153
+&lt; Connection: keep-alive
+&lt; 
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.io" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.io
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:12:47 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+下面我们把 *.magedu.io 换成正则表达式 ~\.google\.com 
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/nginx.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf | grep server_names</span>
+	    valid_referers server_names ~\.google\.com;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl 127.0.0.1</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.com
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:51:31 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.magedu.org" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.magedu.org
+&gt; 
+&lt; HTTP/1.1 403 Forbidden
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:51:38 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 153
+&lt; Connection: keep-alive
+&lt; 
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.google.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.google.com
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:51:48 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 19
+&lt; Last-Modified: Fri, 11 Oct 2019 06:28:02 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5da020f2-13"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+default nginx page
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -v -e "http://www.baidu.com" 127.0.0.1</span>
+* About to connect() to 127.0.0.1 port 80 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to 127.0.0.1 (127.0.0.1) port 80 (<span class="hljs-comment">#0)</span>
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: 127.0.0.1
+&gt; Accept: */*
+&gt; Referer: http://www.baidu.com
+&gt; 
+&lt; HTTP/1.1 403 Forbidden
+&lt; Server: nginx/1.16.0
+&lt; Date: Sun, 13 Oct 2019 04:51:56 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 153
+&lt; Connection: keep-alive
+&lt; 
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+* Connection <span class="hljs-comment">#0 to host 127.0.0.1 left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+
+</body>
+</html>

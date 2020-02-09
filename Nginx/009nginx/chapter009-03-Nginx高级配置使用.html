@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>chapter009-03-Nginx高级配置使用.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h2 id="%E7%AC%AC%E4%B9%9D%E7%AB%A0-nginx-%E6%9C%8D%E5%8A%A1%E5%99%A8">第九章 Nginx 服务器</h2>
+<h3 id="%E7%AC%AC%E4%B8%89%E8%8A%82-nginx-%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE%E4%BD%BF%E7%94%A8">第三节  Nginx 高级配置使用</h3>
+<p>   Nginx 功能强大，本节我们将通过配置文件来实现各种高级功能</p>
+<h4 id="931-centos76-%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E7%9A%84-nginx-116">9.3.1 CentOS7.6 中使用编译安装的 Nginx 1.16</h4>
+<pre class="hljs"><code><div>我们编译安装一个 Nginx 1.16 版本，方便进行高级配置演示
+
+1. 删除之前在 /apps/ 下的 nginx 文件夹， /data 和 /var/www 文件夹
+[root@localhost ~]<span class="hljs-comment"># rm -rf /apps/nginx/</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># rm -rf /data</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># rm -rf /var/www</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+
+2. 回到之前的 nginx 编译文件夹， 重新安装一次以编译好的 nginx
+[root@localhost ~]<span class="hljs-comment"># cd nginx-1.16.0/</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># make install</span>
+make -f objs/Makefile install
+make[1]: Entering directory /root/nginx-1.16.0
+<span class="hljs-built_in">test</span> -d /apps/nginx || mkdir -p /apps/nginx
+<span class="hljs-built_in">test</span> -d /apps/nginx/sbin \
+	|| mkdir -p /apps/nginx/sbin
+<span class="hljs-built_in">test</span> ! -f /apps/nginx/sbin/nginx \
+	|| mv /apps/nginx/sbin/nginx \
+		/apps/nginx/sbin/nginx.old
+cp objs/nginx /apps/nginx/sbin/nginx
+.
+.
+.省略部分安装输出信息
+.
+.
+<span class="hljs-built_in">test</span> -d /apps/nginx/logs \
+	|| mkdir -p /apps/nginx/logs
+<span class="hljs-built_in">test</span> -d /apps/nginx/html \
+	|| cp -R html /apps/nginx
+<span class="hljs-built_in">test</span> -d /apps/nginx/logs \
+	|| mkdir -p /apps/nginx/logs
+make[1]: Leaving directory /root/nginx-1.16.0
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># cd</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<h4 id="932-nginx-%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE%E5%8A%9F%E8%83%BD">9.3.2 Nginx 高级配置功能</h4>
+<ol>
+<li>开启 nginx 的状态显示功能</li>
+</ol>
+<pre class="hljs"><code><div>1. 要想使用 nginx 的状态显示功能，需要在编译的时候配置 --with-http_stub_status_module 选项，
+   我们可以使用 nginx -V 来验证一下，是否编译了该功能
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># /apps/nginx/sbin/nginx -v</span>
+nginx version: nginx/1.16.0
+[root@localhost ~]<span class="hljs-comment"># /apps/nginx/sbin/nginx -V</span>
+nginx version: nginx/1.16.0
+built by gcc 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) 
+built with OpenSSL 1.0.2k-fips  26 Jan 2017
+TLS SNI support enabled
+configure arguments: --prefix=/apps/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module --with-stream_realip_module --with-debug
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+2. 我们编辑主配置文件， 添加 include 配置功能
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+<span class="hljs-comment"># simple main configure file for nginx 1.16 by gordon</span>
+user  nginx;
+worker_processes  1;
+error_log  logs/error.log  debug;
+pid        logs/nginx.pid;
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+    include /apps/nginx/conf/conf.d/*.conf;
+}
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># mkdir -pv /apps/nginx/conf/conf.d/</span>
+mkdir: created directory ‘/apps/nginx/conf/conf.d/’
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># cat  /apps/nginx/conf/conf.d/pc.conf</span>
+server {
+        listen       80;
+        server_name  www.magedu.net;
+
+        location /nginx_status {
+            stub_status;
+            allow 	127.0.0.1;
+	    allow       192.168.130.0/24;
+            deny        all;
+        }
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+
+3. 访问配置好的 nginx_status 页面，发现有 nginx 服务状态信息其中
+
+Active connections：    表示当前处于活动状态的客户端连接数，包括连接等待空闲连接数
+accepts：               表示Nginx自启动后已经接受的客户端请求的总数
+handled：               表示Nginx自启动后已经处理完成的客户端请求的总数，通常等于accepts，
+                        除非有因worker_connections限制等被拒绝的连接
+requests：              表示Nginx自启动后客户端发来的总的请求数
+Reading：               当前状态，正在读取客户端请求报文首部的连接的连接数。
+Writing：               当前状态，正在向客户端发送响应报文过程中的连接数。
+Waiting：               当前状态，正在等待客户端发出请求的空闲连接数，开启 keep-alive的情况下,这个值等于
+                        active – (reading + writing),
+下面访问测试一下：
+[root@localhost ~]<span class="hljs-comment">#                      </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/nginx_status</span>
+Active connections: 1 
+server accepts handled requests
+       1       1       1 
+Reading: 0 Writing: 1 Waiting: 0 
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<ol start="2">
+<li>nginx 使用第三方模块</li>
+</ol>
+<pre class="hljs"><code><div>下面我们演示一下 <span class="hljs-built_in">echo</span> 模块的使用
+
+1. 使用 Git 下载第三方 <span class="hljs-built_in">echo</span> 模块源码文件包
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># yum install git -y</span>
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.cqu.edu.cn
+ * epel: mirrors.yun-idc.com
+ * extras: mirrors.nju.edu.cn
+ * updates: mirrors.nju.edu.cn
+Package git-1.8.3.1-20.el7.x86_64 already installed and latest version
+Nothing to <span class="hljs-keyword">do</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># git clone https://github.com/openresty/echo-nginx-module.git</span>
+Cloning into <span class="hljs-string">'echo-nginx-module'</span>...
+remote: Enumerating objects: 3003, <span class="hljs-keyword">done</span>.
+remote: Total 3003 (delta 0), reused 0 (delta 0), pack-reused 3003
+Receiving objects: 100% (3003/3003), 1.14 MiB | 133.00 KiB/s, <span class="hljs-keyword">done</span>.
+Resolving deltas: 100% (1615/1615), <span class="hljs-keyword">done</span>.
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># ll</span>
+total 1016
+drwxr-xr-x. 2 root root      26 Jun  9 18:57 about
+-rw-------. 1 root root    1368 Apr 27 16:21 anaconda-ks.cfg
+drwxr-xr-x. 6 root root     186 Jun 10 14:34 <span class="hljs-built_in">echo</span>-nginx-module
+drwxr-xr-x. 9 1001 1001     186 Jun  8 20:47 nginx-1.16.0
+-rw-r--r--. 1 root root 1032345 Apr 23 21:58 nginx-1.16.0.tar.gz
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+
+2. 删除原来的 nginx， 重新编译一个包含 <span class="hljs-built_in">echo</span> 功能模块的 nginx
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl stop nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># rm -rf /apps/</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># mv  nginx-1.16.0 nginx-1.16.0.bak</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># tar xf nginx-1.16.0.tar.gz</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># ll</span>
+total 1016
+drwxr-xr-x. 2 root root      26 Jun  9 18:57 about
+-rw-------. 1 root root    1368 Apr 27 16:21 anaconda-ks.cfg
+drwxr-xr-x. 6 root root     186 Jun 10 14:34 <span class="hljs-built_in">echo</span>-nginx-module
+drwxr-xr-x. 8 1001 1001     158 Apr 23 21:13 nginx-1.16.0
+drwxr-xr-x. 9 1001 1001     186 Jun  8 20:47 nginx-1.16.0.bak
+-rw-r--r--. 1 root root 1032345 Apr 23 21:58 nginx-1.16.0.tar.gz
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cd nginx-1.16.0</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># ./configure --prefix=/apps/nginx --user=nginx --group=nginx --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-http_gzip_static_module --with-pcre --with-stream --with-stream_ssl_module --with-stream_realip_module --with-http_perl_module --with-debug --add-module=/root/echo-nginx-module</span>
+
+checking <span class="hljs-keyword">for</span> OS
+ + Linux 3.10.0-957.el7.x86_64 x86_64
+checking <span class="hljs-keyword">for</span> C compiler ... found
+ + using GNU C compiler
+ + gcc version: 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) 
+checking <span class="hljs-keyword">for</span> gcc -pipe switch ... found
+checking <span class="hljs-keyword">for</span> -Wl,-E switch ... found
+checking <span class="hljs-keyword">for</span> gcc <span class="hljs-built_in">builtin</span> atomic operations ... found
+checking <span class="hljs-keyword">for</span> C99 variadic macros ... found
+checking <span class="hljs-keyword">for</span> gcc variadic macros ... found
+checking <span class="hljs-keyword">for</span> gcc <span class="hljs-built_in">builtin</span> 64 bit byteswap ... found
+checking <span class="hljs-keyword">for</span> unistd.h ... found
+.
+.
+.省略部分编辑检查输出信息.....
+.
+.
+Configuration summary
+  + using system PCRE library
+  + using system OpenSSL library
+  + using system zlib library
+
+  nginx path prefix: <span class="hljs-string">"/apps/nginx"</span>
+  nginx binary file: <span class="hljs-string">"/apps/nginx/sbin/nginx"</span>
+  nginx modules path: <span class="hljs-string">"/apps/nginx/modules"</span>
+  nginx configuration prefix: <span class="hljs-string">"/apps/nginx/conf"</span>
+  nginx configuration file: <span class="hljs-string">"/apps/nginx/conf/nginx.conf"</span>
+  nginx pid file: <span class="hljs-string">"/apps/nginx/logs/nginx.pid"</span>
+  nginx error <span class="hljs-built_in">log</span> file: <span class="hljs-string">"/apps/nginx/logs/error.log"</span>
+  nginx http access <span class="hljs-built_in">log</span> file: <span class="hljs-string">"/apps/nginx/logs/access.log"</span>
+  nginx http client request body temporary files: <span class="hljs-string">"client_body_temp"</span>
+  nginx http proxy temporary files: <span class="hljs-string">"proxy_temp"</span>
+  nginx http fastcgi temporary files: <span class="hljs-string">"fastcgi_temp"</span>
+  nginx http uwsgi temporary files: <span class="hljs-string">"uwsgi_temp"</span>
+  nginx http scgi temporary files: <span class="hljs-string">"scgi_temp"</span>
+
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># make -j 4</span>
+make -f objs/Makefile
+make[1]: Entering directory /root/nginx-1.16.0
+cc -c -pipe  -O -W -Wall -Wpointer-arith -Wno-unused-parameter -Werror -g  -I src/core -I src/event -I src/event/modules -I src/os/unix -I objs \
+	-o objs/src/core/nginx.o \
+	src/core/nginx.c
+.
+.省略部分编译输出信息.....
+.
+objs/addon/src/ngx_http_echo_sleep.o \
+objs/addon/src/ngx_http_echo_location.o \
+objs/addon/src/ngx_http_echo_echo.o \
+objs/addon/src/ngx_http_echo_request_info.o \
+objs/addon/src/ngx_http_echo_subrequest.o \
+objs/addon/src/ngx_http_echo_foreach.o \
+objs/ngx_modules.o \
+-ldl -lpthread -lcrypt -lpcre -lssl -lcrypto -ldl -lpthread -lz \
+-Wl,--<span class="hljs-built_in">enable</span>-new-dtags -Wl,-rpath,/usr/lib64/perl5/CORE -fstack-protector -L/usr/lib64/perl5/CORE -lperl -lresolv -lnsl -ldl -lm -lcrypt -lutil -lpthread -lc \
+-Wl,-E
+make[1]: Leaving directory /root/nginx-1.16.0
+[root@localhost nginx-1.16.0]<span class="hljs-comment">#</span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># make install</span>
+make -f objs/Makefile install
+make[1]: Entering directory /root/nginx-1.16.0
+<span class="hljs-built_in">cd</span> objs/src/http/modules/perl &amp;&amp; make install
+make[2]: Entering directory /root/nginx-1.16.0/objs/src/http/modules/perl
+Files found <span class="hljs-keyword">in</span> blib/arch: installing files <span class="hljs-keyword">in</span> blib/lib into architecture dependent library tree
+Installing /usr/<span class="hljs-built_in">local</span>/lib64/perl5/auto/nginx/nginx.bs
+Installing /usr/<span class="hljs-built_in">local</span>/lib64/perl5/auto/nginx/nginx.so
+.
+.省略部分安装输出信息......
+.
+<span class="hljs-built_in">test</span> -d /apps/nginx/html \
+	|| cp -R html /apps/nginx
+<span class="hljs-built_in">test</span> -d /apps/nginx/logs \
+	|| mkdir -p /apps/nginx/logs
+make[1]: Leaving directory /root/nginx-1.16.0
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+[root@localhost nginx-1.16.0]<span class="hljs-comment"># </span>
+
+
+3.编辑配置主配置文件和子配置文件
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+<span class="hljs-comment">#simple main configure file for nginx 1.16 by gordon</span>
+user  nginx;
+worker_processes  1;
+error_log  logs/error.log  debug;
+pid        logs/nginx.pid;
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+    include /apps/nginx/conf/conf.d/*.conf;
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># mkdir -pv /apps/nginx/conf/conf.d/</span>
+mkdir: created directory ‘/apps/nginx/conf/conf.d/’
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+<span class="hljs-built_in">echo</span> 模块具体的用法可以访问 https://github.com/openresty/<span class="hljs-built_in">echo</span>-nginx-module ，下面我们做几个简单的演示
+[root@localhost ~]<span class="hljs-comment"># vi /apps/nginx/conf/conf.d/pc.conf</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf</span>
+server {
+	listen		80;
+	server_name	www.magedu.net;
+
+	location /main {
+		index index.html;
+		default_type text/html;
+		<span class="hljs-built_in">echo</span> <span class="hljs-string">"hello world,main--&gt;"</span>;
+		echo_reset_timer;
+		echo_location /sub1;
+		echo_location /sub2;
+		<span class="hljs-built_in">echo</span> <span class="hljs-string">"took <span class="hljs-variable">$echo_timer_elapsed</span> sec for total."</span>;
+	}
+
+	location /sub1 {
+		echo_sleep 1;
+		<span class="hljs-built_in">echo</span> sub1;
+	}
+
+	location /sub2 {
+		echo_sleep 1;
+		<span class="hljs-built_in">echo</span> sub2;
+	}
+
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+
+4.启动 nginx，访问对应的 location
+[root@localhost ~]<span class="hljs-comment"># systemctl start nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main</span>
+hello world,main--&gt;
+sub1
+sub2
+took 2.004 sec <span class="hljs-keyword">for</span> total.
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/sub1</span>
+sub1
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/sub2</span>
+sub2
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+</div></code></pre>
+<ol start="3">
+<li>nginx 内置变量和自定义变量</li>
+</ol>
+<pre class="hljs"><code><div>1. 常用变量
+<span class="hljs-variable">$remote_addr</span>            存放了客户端的地址，注意是客户端的公网IP，也就是一家人访问一个网站，则会显示为路由器的公网IP。
+<span class="hljs-variable">$args</span>                   URL中的指令包含的参数，例如http://www.magedu.net/main/index.do?id=20190221&amp;partner=search 
+                        中的id=20190221&amp;partner=search，动态服务器中经常会有这些信息
+<span class="hljs-variable">$document_root</span>          保存了针对当前资源的请求的系统根目录，如/apps/nginx/html
+<span class="hljs-variable">$document_uri</span>           保存了当前请求中不包含指令的URI，注意是不包含请求的指令，比如
+                        http://www.magedu.net/main/index.do?id=20190221&amp;partner=search 会被定义为 /main/index.do
+<span class="hljs-variable">$host</span>                   存放了请求的 host 名称
+<span class="hljs-variable">$http_user_agent</span>        客户端使用的浏览器的详细信息
+<span class="hljs-variable">$limit_rate</span>             如果 nginx 服务器使用 limit_rate 配置了显示网络速率，则会显示，如果没有设置， 则显示 0
+<span class="hljs-variable">$remote_port</span>            客户端请求 nginx 服务器时随机打开的端口，这是每个客户端自己的端口。
+<span class="hljs-variable">$request_body_file</span>      做反向代理时发给后端服务器的本地资源的名称
+<span class="hljs-variable">$request_method</span>         请求资源的方式，GET/PUT/DELETE等
+<span class="hljs-variable">$request_filename</span>       当前请求的资源文件的路径名称，由root或<span class="hljs-built_in">alias</span>指令与URI请求生成的文件绝对路径，
+                        比如 /apps/nginx/html/main/index.html
+<span class="hljs-variable">$scheme</span>                 请求的协议，如ftp，https，http等
+<span class="hljs-variable">$server_protocol</span>        保存了客户端请求资源使用的协议的版本，如HTTP/1.0，HTTP/1.1，HTTP/2.0等
+<span class="hljs-variable">$server_addr</span>            保存了服务器的 IP 地址
+<span class="hljs-variable">$server_name</span>            请求的服务器的主机名
+<span class="hljs-variable">$server_port</span>            请求的服务器的端口号
+
+
+2. 自定义变量，可以在配置文件的 server location <span class="hljs-keyword">if</span> 中使用 <span class="hljs-built_in">set</span> <span class="hljs-variable">$varname</span> value 进行设置
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf </span>
+server {
+	listen		80;
+	server_name	www.magedu.net;
+	location /main {
+		index index.html;
+		<span class="hljs-built_in">echo</span> <span class="hljs-variable">$remote_addr</span>;
+		<span class="hljs-built_in">set</span> <span class="hljs-variable">$magedu</span> <span class="hljs-string">"magedu.com"</span>;
+		<span class="hljs-built_in">echo</span> <span class="hljs-variable">$magedu</span>;
+	}
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main</span>
+127.0.0.1
+magedu.com
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+</div></code></pre>
+<ol start="4">
+<li>自定义 nginx 访问日志格式</li>
+</ol>
+<pre class="hljs"><code><div>我们使用刚讲过的 nginx 变量，组合出我们想要的访问日志格式，编辑配置文件
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+<span class="hljs-comment">#simple main configure file for nginx 1.16 by gordon</span>
+user  nginx;
+worker_processes  1;
+error_log  logs/error.log  debug;
+pid        logs/nginx.pid;
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+
+    log_format  nginx_format1       <span class="hljs-string">'$remote_addr - $remote_user [$time_local]"$request" '</span>
+                                    <span class="hljs-string">'$status $body_bytes_sent "$http_referer" '</span>
+                                    <span class="hljs-string">'"$http_user_agent" "$http_x_forwarded_for"'</span>
+				    <span class="hljs-string">'$server_name:$server_port'</span>;
+    
+server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+    include /apps/nginx/conf/conf.d/*.conf;
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf </span>
+server {
+	listen		80;
+	server_name	www.magedu.net;
+	
+	access_log	logs/access.log 	nginx_format1;
+
+	location /main {
+		root  /var/www/nginx;
+		index index.html;
+	}
+
+
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># mkdir -pv /var/www/nginx/main</span>
+mkdir: created directory ‘/var/www’
+mkdir: created directory ‘/var/www/nginx’
+mkdir: created directory ‘/var/www/nginx/main’
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># echo "main page by nginx 1.16 " &gt;  /var/www/nginx/main/index.html</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main/index.html</span>
+main page by nginx 1.16 
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/logs/access.log </span>
+
+127.0.0.1 - - [10/Jun/2019:16:32:39 +0800]<span class="hljs-string">"GET /main/index.html HTTP/1.1"</span> 200 25 <span class="hljs-string">"-"</span> <span class="hljs-string">"curl/7.29.0"</span> <span class="hljs-string">"-"</span>www.magedu.net:80
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+下面我们设计一个 json 格式的访问日志，方便后期使用程序处理分析日志
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/nginx.conf</span>
+<span class="hljs-comment">#simple main configure file for nginx 1.16 by gordon</span>
+user  nginx;
+worker_processes  1;
+error_log  logs/error.log  debug;
+pid        logs/nginx.pid;
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+
+    <span class="hljs-comment">#log_format  nginx_format1       '$remote_addr - $remote_user [$time_local]"$request" '</span>
+    <span class="hljs-comment">#                                '$status $body_bytes_sent "$http_referer" '</span>
+    <span class="hljs-comment">#                                '"$http_user_agent" "$http_x_forwarded_for"'</span>
+    <span class="hljs-comment">#				    '$server_name:$server_port';</span>
+
+    log_format   access_json	<span class="hljs-string">'{"@timestamp":"$time_iso8601",'</span>
+				<span class="hljs-string">'"host":"$server_addr",'</span>
+				<span class="hljs-string">'"clientip":"$remote_addr",'</span>
+				<span class="hljs-string">'"size":$body_bytes_sent,'</span>
+				<span class="hljs-string">'"responsetime":$request_time,'</span>
+				<span class="hljs-string">'"upstreamtime":"$upstream_response_time",'</span>
+				<span class="hljs-string">'"upstreamhost":"$upstream_addr",'</span>
+				<span class="hljs-string">'"http_host":"$host",'</span>
+				<span class="hljs-string">'"uri":"$uri",'</span>
+				<span class="hljs-string">'"domain":"$host",'</span>
+				<span class="hljs-string">'"xff":"$http_x_forwarded_for",'</span>
+				<span class="hljs-string">'"referer":"$http_referer",'</span>
+				<span class="hljs-string">'"tcp_xff":"$proxy_protocol_addr",'</span>
+				<span class="hljs-string">'"http_user_agent":"$http_user_agent",'</span>
+				<span class="hljs-string">'"status":"$status"}'</span>;
+
+    
+server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }
+    include /apps/nginx/conf/conf.d/*.conf;
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf </span>
+server {
+	listen		80;
+	server_name	www.magedu.net;
+	
+	access_log	logs/access.log 	access_json;
+
+	location /main {
+		root /var/www/nginx;
+		index index.html;
+	}
+
+
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># echo "" &gt; /apps/nginx/logs/access.log </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;301 Moved Permanently&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;301 Moved Permanently&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main/indexs.html</span>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;404 Not Found&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;404 Not Found&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.16.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main/index.html</span>
+main page by nginx 1.16 
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/logs/access.log </span>
+
+{<span class="hljs-string">"@timestamp"</span>:<span class="hljs-string">"2019-06-10T19:42:18+08:00"</span>,<span class="hljs-string">"host"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"clientip"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"size"</span>:169,<span class="hljs-string">"responsetime"</span>:0.000,<span class="hljs-string">"upstreamtime"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"upstreamhost"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"http_host"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"uri"</span>:<span class="hljs-string">"/main"</span>,<span class="hljs-string">"domain"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"xff"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"referer"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"tcp_xff"</span>:<span class="hljs-string">""</span>,<span class="hljs-string">"http_user_agent"</span>:<span class="hljs-string">"curl/7.29.0"</span>,<span class="hljs-string">"status"</span>:<span class="hljs-string">"301"</span>}
+{<span class="hljs-string">"@timestamp"</span>:<span class="hljs-string">"2019-06-10T19:42:26+08:00"</span>,<span class="hljs-string">"host"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"clientip"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"size"</span>:25,<span class="hljs-string">"responsetime"</span>:0.000,<span class="hljs-string">"upstreamtime"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"upstreamhost"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"http_host"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"uri"</span>:<span class="hljs-string">"/main/index.html"</span>,<span class="hljs-string">"domain"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"xff"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"referer"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"tcp_xff"</span>:<span class="hljs-string">""</span>,<span class="hljs-string">"http_user_agent"</span>:<span class="hljs-string">"curl/7.29.0"</span>,<span class="hljs-string">"status"</span>:<span class="hljs-string">"200"</span>}
+{<span class="hljs-string">"@timestamp"</span>:<span class="hljs-string">"2019-06-10T19:42:47+08:00"</span>,<span class="hljs-string">"host"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"clientip"</span>:<span class="hljs-string">"127.0.0.1"</span>,<span class="hljs-string">"size"</span>:153,<span class="hljs-string">"responsetime"</span>:0.000,<span class="hljs-string">"upstreamtime"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"upstreamhost"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"http_host"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"uri"</span>:<span class="hljs-string">"/main/indexs.html"</span>,<span class="hljs-string">"domain"</span>:<span class="hljs-string">"www.magedu.net"</span>,<span class="hljs-string">"xff"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"referer"</span>:<span class="hljs-string">"-"</span>,<span class="hljs-string">"tcp_xff"</span>:<span class="hljs-string">""</span>,<span class="hljs-string">"http_user_agent"</span>:<span class="hljs-string">"curl/7.29.0"</span>,<span class="hljs-string">"status"</span>:<span class="hljs-string">"404"</span>}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<ol start="5">
+<li>nginx 开启传输文件压缩功能</li>
+</ol>
+<pre class="hljs"><code><div>压缩相关的配置选项：
+gzip on | off;                      开启或者关闭 gzip 压缩功能
+gzip_comp_level 2;                  指定压缩级别 1到9, 9的压缩率最高
+gzip_disable <span class="hljs-string">"MSIE [1-6]\."</span>;        指定特定浏览器不使用压缩功能
+gzip_min_length 1k;                 启用压缩功能文件的阈值，即大于等于 1k 的文件才压缩
+gzip_http_version 1.0 | 1.1;        支持压缩的 http 协议版本
+gzip_buffers 32 16k;                指定 gzip 使用的缓冲空间个数和大小
+gzip_types text/html;               指明可以使用压缩功能的文件类型(mime 类型)
+gzip_vary on | off;                 压缩文件后是否在 http 头部添加信息 Vary: Accept-Encoding 
+
+
+下面我们配置打开 gzip 功能，进行访问测试：
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf</span>
+server {
+	listen		80;
+	server_name	www.magedu.net;
+	
+	access_log	logs/access.log 	access_json;
+
+	gzip 		on;
+	gzip_min_length 1k;
+	gzip_comp_level 9;
+	
+	location /main {
+		root /var/www/nginx;
+		index index.html;
+	}
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># cat /var/log/messages &gt; /var/www/nginx/main/index.html </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># ll /var/www/nginx/main/index.html </span>
+-rw-r--r--. 1 root root 60463 Jun 10 20:09 /var/www/nginx/main/index.html
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+进行访问测试，测试是否开启 gzip 功能
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># curl -I www.magedu.net/main/index.html</span>
+HTTP/1.1 200 OK
+Server: nginx/1.16.0
+Date: Mon, 10 Jun 2019 12:15:41 GMT
+Content-Type: text/html
+Content-Length: 60463
+Last-Modified: Mon, 10 Jun 2019 12:09:36 GMT
+Connection: keep-alive
+ETag: <span class="hljs-string">"5cfe4880-ec2f"</span>
+Accept-Ranges: bytes
+
+[root@localhost ~]<span class="hljs-comment"># curl --head --compressed www.magedu.net/main/index.html</span>
+HTTP/1.1 200 OK
+Server: nginx/1.16.0
+Date: Mon, 10 Jun 2019 12:15:44 GMT
+Content-Type: text/html
+Last-Modified: Mon, 10 Jun 2019 12:09:36 GMT
+Connection: keep-alive
+ETag: W/<span class="hljs-string">"5cfe4880-ec2f"</span>
+Content-Encoding: gzip
+
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+<ol start="6">
+<li>开启 https 功能</li>
+</ol>
+<pre class="hljs"><code><div>https 相关的几个配置选项：
+
+ssl on | off;                                   是否开启 https 功能
+ssl_certificate /path/to/file;                  nginx 服务器端加密公钥存放绝对路径
+ssl_certificate_key /path/to/file;              nginx 服务器端加密私钥存放的绝对路径
+ssl_protocols [TLSv1] [TLSv1.1] [TLSv1.2];      配置 https 支持的加密算法
+ssl_session_cache off;                          配置 https 是否支持加密会话缓存功能，还有其他几个选项：
+                                                none: 通知客户端支持ssl session cache，但实际不支持
+                                                <span class="hljs-built_in">builtin</span>[:size]：使用OpenSSL内建缓存，为每worker进程私有
+                                                [shared:name:size]：在各worker之间使用一个共享的缓存，需
+                                                要定义一个缓存名称和缓存空间大小，一兆可以存储4000个会话信
+                                                息，多个虚拟主机可以使用相同的缓存名称。
+ssl_session_timeout time;                       客户端连接可以复用ssl session cache中缓存的有效时长，默认5m
+
+
+1. 下面我们首先使用 openssl 创建一个自签证书
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># cd /apps/nginx/</span>
+[root@localhost nginx]<span class="hljs-comment">#</span>
+[root@localhost nginx]<span class="hljs-comment">#</span>
+[root@localhost nginx]<span class="hljs-comment"># mkdir -pv certs</span>
+mkdir: created directory ‘certs’
+[root@localhost nginx]<span class="hljs-comment"># </span>
+[root@localhost nginx]<span class="hljs-comment"># cd certs/</span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl req -newkey rsa:4096 -nodes -sha256 -keyout ca.key -x509 -days 3650 -out ca.crt</span>
+Generating a 4096 bit RSA private key
+......++
+..............++
+writing new private key to <span class="hljs-string">'ca.key'</span>
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="hljs-string">'.'</span>, the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:CN
+State or Province Name (full name) []:Beijing
+Locality Name (eg, city) [Default City]:Beijing
+Organization Name (eg, company) [Default Company Ltd]:magedu.Ltd
+Organizational Unit Name (eg, section) []:magedu
+Common Name (eg, your name or your servers hostname) []:magedu.ca   
+Email Address []:
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># ll</span>
+total 8
+-rw-r--r--. 1 root root 2025 Jun 11 15:01 ca.crt
+-rw-r--r--. 1 root root 3272 Jun 11 15:01 ca.key
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+2. 下面创建一个证书签发请求文件 csr
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl req -newkey rsa:4096 -nodes -sha256 -keyout www.magedu.net.key -out www.magedu.net.csr</span>
+Generating a 4096 bit RSA private key
+.......................................................................................++
+.............................................................................++
+writing new private key to <span class="hljs-string">'www.magedu.net.key'</span>
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="hljs-string">'.'</span>, the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:CN
+State or Province Name (full name) []:Beijing
+Locality Name (eg, city) [Default City]:Beijing
+Organization Name (eg, company) [Default Company Ltd]:magedu.Ltd
+Organizational Unit Name (eg, section) []:magedu
+Common Name (eg, your name or your servers hostname) []:www.magedu.net
+Email Address []:
+
+Please enter the following <span class="hljs-string">'extra'</span> attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># ll</span>
+total 16
+-rw-r--r--. 1 root root 2025 Jun 11 15:01 ca.crt
+-rw-r--r--. 1 root root 3272 Jun 11 15:01 ca.key
+-rw-r--r--. 1 root root 1708 Jun 11 15:12 www.magedu.net.csr
+-rw-r--r--. 1 root root 3272 Jun 11 15:12 www.magedu.net.key
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+
+3. 使用生成的 ca 和 签署请求文件 csr 创建证书
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl x509 -req -days 3650 -in www.magedu.net.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out www.magedu.net.crt</span>
+Signature ok
+subject=/C=CN/ST=Beijing/L=Beijing/O=magedu.Ltd/OU=magedu/CN=www.magedu.net
+Getting CA Private Key
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+4. 验证一下证书内容是否正确
+[root@localhost certs]<span class="hljs-comment"># openssl x509 -in www.magedu.net.crt -noout -text</span>
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            d3:e4:ff:72:71:8d:61:5b
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=CN, ST=Beijing, L=Beijing, O=magedu.Ltd, OU=magedu, CN=magedu.ca
+        Validity
+            Not Before: Jun 11 07:15:10 2019 GMT
+            Not After : Jun  8 07:15:10 2029 GMT
+        Subject: C=CN, ST=Beijing, L=Beijing, O=magedu.Ltd, OU=magedu, CN=www.magedu.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:c8:25:ee:2f:bc:<span class="hljs-built_in">fc</span>:25:aa:1c:57:fb:2a:<span class="hljs-built_in">fc</span>:d1:
+                    41:c8:e9:0a:1f:42:01:cf:2c:8f:6d:75:db:82:69:
+                    13:91:7b:d8:80:76:7a:c8:bb:71:65:4c:19:75:09:
+                    f2:19:16:1c:d8:dd:13:fb:ce:8f:4e:6f:6f:01:96:
+                    bd:df:c9:e2:d0:9c:5b:77:86:b1:6f:37:98:11:df:
+                    15:d6:6d:7e:e5:57:d6:dc:79:8f:cb:30:04:0c:31:
+                    9b:2f:06:78:fd:66:54:31:55:90:74:6a:c7:a0:30:
+                    27:45:4e:43:67:9f:74:ff:ad:9c:03:76:b9:bb:31:
+                    d7:06:79:32:9d:07:ab:ae:30:d3:48:81:eb:b7:0b:
+                    ca:71:25:9e:29:e0:c0:ff:fd:85:<span class="hljs-built_in">cd</span>:1c:a1:f7:8a:
+                    c3:c1:82:cf:af:d0:4a:94:af:fa:25:09:6b:c5:f2:
+                    d2:9c:a1:ac:07:60:40:d2:f8:2f:f3:5c:bd:53:5d:
+                    50:d3:36:a1:a2:45:26:5e:77:58:<span class="hljs-built_in">fc</span>:3d:b8:f1:08:
+                    f5:53:be:83:83:84:1d:91:4f:69:22:9f:11:93:3c:
+                    ba:3f:d1:d7:bf:e1:91:c4:b9:59:12:88:10:d3:ba:
+                    a8:4c:88:69:57:28:c4:bd:3e:4f:47:3a:10:40:a0:
+                    4e:70:72:2f:8b:0e:d6:79:e9:40:86:be:34:5e:c8:
+                    b1:ce:8a:1b:04:77:73:b8:25:50:7f:5e:4c:6b:57:
+                    95:74:1c:a2:58:e6:23:2d:9f:91:f3:e6:3a:6d:a2:
+                    04:d3:a9:a5:76:c8:bf:51:14:f5:65:46:72:73:44:
+                    7d:60:9a:09:d5:a2:1e:18:c1:21:e8:54:79:5e:95:
+                    b0:76:72:26:43:cc:a1:df:65:ae:4d:f6:27:21:c0:
+                    7e:09:45:d1:c2:35:a7:23:5d:75:49:a9:a8:e3:ca:
+                    7e:2a:1d:01:d7:40:52:73:<span class="hljs-built_in">fc</span>:14:18:9b:72:41:e7:
+                    78:79:96:b5:6c:af:96:3d:73:8b:3e:66:14:53:6d:
+                    18:cc:b6:4b:69:7d:51:b1:47:e2:a3:75:c7:fa:78:
+                    20:a7:73:e1:02:33:26:ce:7f:da:10:fa:2a:f5:bf:
+                    79:02:3d:bc:7e:f4:85:2a:a9:1c:<span class="hljs-built_in">fc</span>:e9:98:0a:82:
+                    86:41:00:08:84:37:42:13:0f:ad:ba:9a:8b:49:c5:
+                    9e:d4:4a:1a:a0:13:1f:9e:63:f3:2a:7a:5d:32:f3:
+                    cf:5a:e6:83:d8:9e:c1:65:2e:d0:4d:98:57:a2:0d:
+                    e8:27:a5:1d:38:05:ca:47:20:4f:55:aa:1a:6f:5b:
+                    15:33:3d:14:09:98:18:2d:76:9b:71:dc:aa:fd:60:
+                    fa:d4:0a:40:c2:2d:bd:00:f2:4d:36:bf:64:c4:8b:
+                    8f:b0:15
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha256WithRSAEncryption
+         43:8d:86:86:56:5e:84:e7:96:54:39:10:4f:17:88:59:7e:80:
+         f7:05:49:<span class="hljs-built_in">cd</span>:92:f0:c9:d3:08:3d:4e:18:31:96:82:e6:a6:ed:
+         00:b7:ed:97:db:e4:86:b5:e4:<span class="hljs-built_in">fc</span>:5c:6a:f8:64:56:85:2a:ac:
+         86:40:d0:18:43:a4:b3:92:20:2e:15:95:c2:40:09:49:f3:6f:
+         97:a7:be:98:c2:c4:0b:25:47:a4:61:0c:11:a0:d6:c5:2a:86:
+         ce:16:66:3b:5c:7a:18:ec:f1:b3:b1:5a:da:13:fb:3d:48:61:
+         32:25:a4:11:f5:24:d1:fd:bf:b2:8e:20:52:cc:56:8d:0b:f3:
+         82:3f:7b:d7:3f:e1:86:4a:55:e0:0a:4c:10:bc:b0:0b:68:3e:
+         cf:52:46:2c:35:49:0e:29:f3:f0:29:50:1a:32:61:ee:fd:5d:
+         18:3d:53:9e:48:05:e5:a3:e0:0f:35:d5:c7:d6:c8:64:38:7d:
+         93:a1:da:c9:12:43:6e:f9:bf:14:2d:21:03:6d:9c:c7:af:2c:
+         c1:42:34:d2:7f:36:94:9b:e5:50:a7:e2:f3:12:11:6a:00:da:
+         f1:43:ed:9b:99:6f:19:06:0e:e7:bb:e0:2a:5b:7f:7a:63:3c:
+         f9:13:0d:20:4b:55:c9:ea:97:bf:02:36:5a:e5:7f:30:bb:5a:
+         8f:ec:a5:aa:da:3e:d7:44:c3:24:d3:17:d4:52:7d:ba:41:a5:
+         01:17:32:f2:b4:7f:32:c0:58:73:8e:93:83:8d:7e:fe:28:9f:
+         97:fa:a4:4d:cb:26:98:49:48:bb:5c:76:4a:84:cc:50:83:eb:
+         fe:d4:7f:9a:35:82:0e:ac:59:42:<span class="hljs-built_in">fc</span>:3f:33:0b:54:08:9d:68:
+         5b:ae:75:cc:91:6e:19:8e:c7:0b:1f:6c:46:5a:01:0c:22:68:
+         39:7f:47:31:7f:c9:c4:e5:18:f8:db:3c:33:ab:11:9d:a7:12:
+         8a:f0:79:bd:f3:90:37:31:77:ac:3b:c4:72:28:cb:04:b2:75:
+         39:e8:d4:47:8f:de:1f:c3:fa:23:e9:8e:4b:2d:c4:35:88:14:
+         4d:33:9b:be:f2:2e:23:85:aa:14:fa:51:c9:8a:38:d2:82:93:
+         b7:9f:86:19:da:63:05:1a:6f:c3:90:a3:c0:14:39:65:65:7c:
+         11:e0:ed:0c:45:be:<span class="hljs-built_in">cd</span>:f3:05:82:7a:f8:1d:1a:63:<span class="hljs-built_in">cd</span>:52:b9:
+         ee:2f:65:51:62:3e:ef:b7:28:ee:d4:9f:12:74:2a:06:15:60:
+         02:cc:7f:ff:2e:6a:bb:19:a3:e1:5b:4b:0c:e2:d8:08:e6:71:
+         97:2e:4f:af:e6:b2:57:95:a4:19:70:3f:67:eb:<span class="hljs-built_in">fc</span>:fd:30:58:
+         59:f3:01:8a:55:b7:a3:7e
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+
+
+
+5. 用生成的 https 加密相关文件配置 nginx，并使用 curl 命令进行 https 测试
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat  /apps/nginx/conf/conf.d/pc.conf</span>
+server {
+	listen			80;
+	listen 			443	ssl;
+	ssl_certificate 	/apps/nginx/certs/www.magedu.net.crt;
+	ssl_certificate_key 	/apps/nginx/certs/www.magedu.net.key;
+	ssl_session_cache 	shared:sslcache:20m;
+	ssl_session_timeout 	10m;
+	server_name	www.magedu.net;
+	
+	location /main {
+		root /var/www/nginx;
+		index index.html;
+	}
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># echo '&lt;h1&gt; It works by https &lt;/h1&gt;' &gt; /var/www/nginx/main/index.html </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># curl www.magedu.net/main/index.html</span>
+&lt;h1&gt; It works by https &lt;/h1&gt;
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#  </span>
+[root@localhost ~]<span class="hljs-comment"># curl -kv https://www.magedu.net/main/index.html</span>
+* About to connect() to www.magedu.net port 443 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to www.magedu.net (127.0.0.1) port 443 (<span class="hljs-comment">#0)</span>
+* Initializing NSS with certpath: sql:/etc/pki/nssdb
+* skipping SSL peer certificate verification
+* SSL connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+* Server certificate:
+* 	subject: CN=www.magedu.net,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+* 	start date: Jun 11 07:15:10 2019 GMT
+* 	expire date: Jun 08 07:15:10 2029 GMT
+* 	common name: www.magedu.net
+* 	issuer: CN=magedu.ca,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+&gt; GET /main/index.html HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: www.magedu.net
+&gt; Accept: */*
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Tue, 11 Jun 2019 07:29:31 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 29
+&lt; Last-Modified: Tue, 11 Jun 2019 07:23:28 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5cff56f0-1d"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+&lt;h1&gt; It works by https &lt;/h1&gt;
+* Connection <span class="hljs-comment">#0 to host www.magedu.net left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+
+
+6. nginx 支持一个 ip 地址配置多个 https 主机域名
+下面我们再次生成一个新的证书申请请求
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cd /apps/nginx/certs/</span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl req -newkey rsa:4096 -nodes -sha256 -keyout mobile.magedu.net.key -out mobile.magedu.net.csr</span>
+Generating a 4096 bit RSA private key
+....................................................++
+.........................................................................................................................................................................................................................................++
+writing new private key to <span class="hljs-string">'mobile.magedu.net.key'</span>
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="hljs-string">'.'</span>, the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:CN
+State or Province Name (full name) []:Beijing
+Locality Name (eg, city) [Default City]:Beijing
+Organization Name (eg, company) [Default Company Ltd]:magedu.Ltd
+Organizational Unit Name (eg, section) []:magedu
+Common Name (eg, your name or your servers hostname) []:mobile.magedu.net
+Email Address []:
+
+Please enter the following <span class="hljs-string">'extra'</span> attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># ll</span>
+total 32
+-rw-r--r--. 1 root root 2025 Jun 11 15:01 ca.crt
+-rw-r--r--. 1 root root 3272 Jun 11 15:01 ca.key
+-rw-r--r--. 1 root root   17 Jun 11 15:15 ca.srl
+-rw-r--r--. 1 root root 1712 Jun 11 15:40 mobile.magedu.net.csr
+-rw-r--r--. 1 root root 3272 Jun 11 15:40 mobile.magedu.net.key
+-rw-r--r--. 1 root root 1911 Jun 11 15:15 www.magedu.net.crt
+-rw-r--r--. 1 root root 1708 Jun 11 15:12 www.magedu.net.csr
+-rw-r--r--. 1 root root 3272 Jun 11 15:12 www.magedu.net.key
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+生成证书：
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl x509 -req -days 3650 -in mobile.magedu.net.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out mobile.magedu.net.crt</span>
+Signature ok
+subject=/C=CN/ST=Beijing/L=Beijing/O=magedu.Ltd/OU=magedu/CN=mobile.magedu.net
+Getting CA Private Key
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+验证证书内容：
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment"># openssl x509 -in mobile.magedu.net.crt -noout -text</span>
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            d3:e4:ff:72:71:8d:61:5c
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=CN, ST=Beijing, L=Beijing, O=magedu.Ltd, OU=magedu, CN=magedu.ca
+        Validity
+            Not Before: Jun 11 07:42:32 2019 GMT
+            Not After : Jun  8 07:42:32 2029 GMT
+        Subject: C=CN, ST=Beijing, L=Beijing, O=magedu.Ltd, OU=magedu, CN=mobile.magedu.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+                Modulus:
+                    00:ae:e0:c9:8d:a5:77:f2:4a:0e:68:c7:09:c8:7d:
+                    db:95:cb:<span class="hljs-built_in">fc</span>:a7:36:dd:79:0c:ab:a1:18:68:f2:bb:
+                    d3:ed:86:6a:72:d3:05:40:6d:30:98:2c:3f:b8:f6:
+                    3b:47:4a:2c:96:22:c5:01:4b:d0:d9:bb:<span class="hljs-built_in">cd</span>:2f:a5:
+                    1d:9b:c3:93:60:81:c6:a8:a9:26:bd:0f:11:72:d9:
+                    a9:43:ff:77:45:07:2f:7a:6d:31:b1:c5:02:48:31:
+                    7b:b7:7e:60:d7:8e:7a:01:df:c8:b1:91:c6:52:9d:
+                    db:42:1e:4c:f5:00:f6:74:57:fb:c7:20:dd:3f:19:
+                    38:d1:f6:ea:7e:8e:82:91:d8:32:b5:6c:09:ba:68:
+                    fd:5e:8f:e9:85:de:2b:53:bb:78:4d:4d:0f:4f:eb:
+                    88:7e:b9:b1:ff:67:4b:80:65:41:4a:34:43:ab:ae:
+                    03:dd:3f:af:62:c2:21:16:5d:50:22:1a:53:47:9c:
+                    27:99:d8:aa:88:90:6a:8b:c4:74:ed:61:95:0c:f8:
+                    1a:b0:9c:40:da:92:6e:be:60:cf:bb:8f:af:06:ef:
+                    f4:0f:50:9d:66:56:3c:8f:f7:4b:e4:2d:63:d9:1a:
+                    96:19:3f:c1:11:1a:f3:ba:31:dc:e3:56:cc:1c:55:
+                    7a:8a:3f:15:ae:19:da:d6:4e:03:8c:4f:20:7f:f0:
+                    7b:c4:f5:1f:5a:98:ae:6b:65:b3:f1:b2:03:e7:ce:
+                    a8:d4:61:63:a6:c4:1d:c9:43:da:23:bb:8b:7c:98:
+                    4f:72:81:59:bf:29:50:d4:ec:a2:dd:79:a7:9b:bf:
+                    f9:ee:37:66:5a:2a:99:4f:84:54:ee:7a:d5:50:f1:
+                    12:2a:f2:5c:1b:63:ad:93:ff:77:83:14:76:d9:6c:
+                    24:2d:32:49:3f:09:b1:e0:5b:8f:f4:c9:52:f2:38:
+                    0e:e1:07:2c:27:02:22:9d:40:3a:70:24:8e:c0:8a:
+                    84:bc:3f:25:53:3e:ce:2d:a4:cc:1d:89:e0:1b:88:
+                    98:de:bd:65:1b:a8:7e:e9:b3:9f:bb:7a:7a:b2:53:
+                    8e:cb:85:65:ca:0a:d0:37:09:6c:2c:67:6c:fb:4a:
+                    c0:e6:61:b0:40:58:6d:c1:a4:0f:68:ec:42:0a:67:
+                    1b:91:49:42:85:82:d6:d9:5a:5e:23:e8:58:9a:2b:
+                    52:a4:8b:26:9f:e0:03:ca:0d:a6:39:f4:93:e4:00:
+                    da:a4:e7:00:7c:0a:14:67:55:2c:0d:8c:97:96:b2:
+                    92:ef:b1:08:cf:0d:8c:1a:68:19:ed:d2:a0:f1:fa:
+                    49:79:93:29:98:f8:d4:ad:42:c0:4d:8c:9e:05:c2:
+                    d3:5a:0e:7e:2c:1e:b2:32:12:f8:cb:c4:61:d5:a4:
+                    5d:36:b3
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha256WithRSAEncryption
+         48:68:6f:a9:d2:46:86:58:ac:0a:83:e8:2e:1d:54:9c:39:7f:
+         79:44:5e:53:04:66:ef:d6:82:15:91:66:27:b2:01:c2:31:<span class="hljs-built_in">cd</span>:
+         25:18:42:d4:ff:a8:21:bf:a1:f5:f0:6d:d3:ff:a1:d2:bc:9b:
+         da:b6:c3:0a:fe:ef:61:12:3e:95:b6:c9:f9:d9:2e:1f:c1:85:
+         46:54:51:6b:3c:15:99:49:90:4f:1a:f4:84:a9:<span class="hljs-built_in">fc</span>:a5:b4:69:
+         f3:ef:a4:d4:07:e9:68:06:9d:af:bd:3e:89:a9:3b:7e:b7:02:
+         45:4e:ca:d0:3c:fb:6a:dd:4e:8b:86:d1:db:23:48:c3:1c:24:
+         ed:92:7d:12:61:14:b1:c1:40:24:d4:43:89:7d:50:ed:15:8b:
+         f6:23:09:75:ad:c6:48:2f:c0:58:f3:e9:da:05:4f:01:4d:96:
+         1c:1c:10:76:9d:65:4c:01:ff:c1:6a:24:37:26:f7:ad:7c:c9:
+         69:d5:a7:04:64:9b:fa:83:07:21:a3:6d:9a:8a:31:9c:2c:23:
+         c1:05:f8:37:cc:a8:5d:d9:ed:94:ae:1d:95:7c:9c:14:50:ed:
+         32:cc:77:8d:75:8c:c2:93:b1:40:e1:4b:b7:f1:83:f1:6e:da:
+         7a:fe:25:1b:d2:c8:3e:e0:00:05:00:88:77:d2:aa:38:06:77:
+         b8:b6:9b:8e:ab:5e:b9:49:0d:46:98:2d:a6:a4:7f:3f:5e:14:
+         6f:6f:be:15:97:16:ef:ea:1c:94:d4:98:<span class="hljs-built_in">cd</span>:8c:a1:55:2a:5a:
+         cb:0f:e4:08:9e:d9:3e:0f:62:1f:9f:45:64:8e:45:33:68:e6:
+         78:99:09:35:1b:70:60:43:28:73:91:37:f8:10:88:f8:42:9a:
+         22:a2:a8:8a:85:62:48:7b:d8:59:1f:78:9a:8d:c2:fd:17:46:
+         e8:e2:be:<span class="hljs-built_in">cd</span>:76:f1:17:2d:a5:00:ae:1f:29:06:9c:ec:e8:6a:
+         43:ce:af:04:7c:6f:14:34:45:6f:79:78:a9:c4:79:09:a0:9b:
+         28:e1:c6:4f:28:23:72:c1:43:f3:10:aa:a6:5e:29:b4:74:d2:
+         98:de:4a:bd:ac:c0:66:fd:7b:e1:12:<span class="hljs-built_in">cd</span>:30:2e:a4:1e:37:de:
+         67:bc:a6:3b:40:f3:df:f9:38:9c:e6:ee:76:a3:31:6b:a4:1c:
+         6f:3c:6c:57:07:42:f2:74:11:df:7b:4a:dd:88:2a:a9:1c:2f:
+         52:4f:06:52:ce:eb:61:30:41:b3:0e:ea:37:7d:5a:84:3b:e7:
+         a0:eb:d5:d4:3f:bc:ff:d5:c8:4c:b0:67:43:2c:04:e7:5a:40:
+         5e:16:f0:42:98:d4:11:c3:f9:88:b3:2c:77:1e:a5:9d:0b:18:
+         b2:1e:ec:13:e6:f6:b3:fb
+[root@localhost certs]<span class="hljs-comment"># </span>
+[root@localhost certs]<span class="hljs-comment">#</span>
+
+
+配置 nginx 虚拟主机 mobile.magedu.net 支持 https
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /etc/hosts</span>
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 www.magedu.net mobile.magedu.net
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf </span>
+server {
+	listen			80;
+	listen 			443	ssl;
+	ssl_certificate 	/apps/nginx/certs/www.magedu.net.crt;
+	ssl_certificate_key 	/apps/nginx/certs/www.magedu.net.key;
+	ssl_session_cache 	shared:sslcache:20m;
+	ssl_session_timeout 	10m;
+
+	server_name	www.magedu.net;
+	
+	location /main {
+		root /var/www/nginx;
+		index index.html;
+	}
+}
+
+server {
+	listen			80;
+	listen 			443	ssl;
+	ssl_certificate 	/apps/nginx/certs/mobile.magedu.net.crt;
+	ssl_certificate_key 	/apps/nginx/certs/mobile.magedu.net.key;
+	ssl_session_cache 	shared:sslcache:20m;
+	ssl_session_timeout 	10m;
+
+	server_name	mobile.magedu.net;
+	
+	location / {
+		root /var/www/nginx;
+		index index.html;
+	}
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cat /etc/hosts</span>
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 www.magedu.net mobile.magedu.net
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># echo "mobile.magedu.net page" &gt; /var/www/nginx/index.html</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -kv https://www.magedu.net/main/index.html</span>
+* About to connect() to www.magedu.net port 443 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to www.magedu.net (127.0.0.1) port 443 (<span class="hljs-comment">#0)</span>
+* Initializing NSS with certpath: sql:/etc/pki/nssdb
+* skipping SSL peer certificate verification
+* SSL connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+* Server certificate:
+* 	subject: CN=www.magedu.net,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+* 	start date: Jun 11 07:15:10 2019 GMT
+* 	expire date: Jun 08 07:15:10 2029 GMT
+* 	common name: www.magedu.net
+* 	issuer: CN=magedu.ca,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+&gt; GET /main/index.html HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: www.magedu.net
+&gt; Accept: */*
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Tue, 11 Jun 2019 08:11:21 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 29
+&lt; Last-Modified: Tue, 11 Jun 2019 07:33:15 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5cff593b-1d"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+&lt;h1&gt; It works by https &lt;/h1&gt;
+* Connection <span class="hljs-comment">#0 to host www.magedu.net left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl -kv https://mobile.magedu.net/</span>
+* About to connect() to mobile.magedu.net port 443 (<span class="hljs-comment">#0)</span>
+*   Trying 127.0.0.1...
+* Connected to mobile.magedu.net (127.0.0.1) port 443 (<span class="hljs-comment">#0)</span>
+* Initializing NSS with certpath: sql:/etc/pki/nssdb
+* skipping SSL peer certificate verification
+* SSL connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+* Server certificate:
+* 	subject: CN=mobile.magedu.net,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+* 	start date: Jun 11 07:42:32 2019 GMT
+* 	expire date: Jun 08 07:42:32 2029 GMT
+* 	common name: mobile.magedu.net
+* 	issuer: CN=magedu.ca,OU=magedu,O=magedu.Ltd,L=Beijing,ST=Beijing,C=CN
+&gt; GET / HTTP/1.1
+&gt; User-Agent: curl/7.29.0
+&gt; Host: mobile.magedu.net
+&gt; Accept: */*
+&gt; 
+&lt; HTTP/1.1 200 OK
+&lt; Server: nginx/1.16.0
+&lt; Date: Tue, 11 Jun 2019 08:11:36 GMT
+&lt; Content-Type: text/html
+&lt; Content-Length: 23
+&lt; Last-Modified: Tue, 11 Jun 2019 08:11:04 GMT
+&lt; Connection: keep-alive
+&lt; ETag: <span class="hljs-string">"5cff6218-17"</span>
+&lt; Accept-Ranges: bytes
+&lt; 
+mobile.magedu.net page
+* Connection <span class="hljs-comment">#0 to host mobile.magedu.net left intact</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+</div></code></pre>
+<ol start="7">
+<li>配置 nginx 服务器 favicon.ico 小图标</li>
+</ol>
+<pre class="hljs"><code><div>[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#     </span>
+[root@localhost ~]<span class="hljs-comment"># cat /apps/nginx/conf/conf.d/pc.conf </span>
+server {
+	listen			80;
+	server_name	www.magedu.net;
+	
+	location /main {
+		root 	/var/www/nginx;
+		index 	index.html;
+	}
+
+	location = /favicon.ico {
+		root	/var/www/nginx/image;
+	}
+}
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># mkdir -pv /var/www/nginx/image</span>
+mkdir: created directory ‘/var/www/nginx/image’
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># wget www.magedu.com/favicon.ico </span>
+--2019-06-11 16:30:39--  http://www.magedu.com/favicon.ico
+Resolving www.magedu.com (www.magedu.com)... 101.200.188.230
+Connecting to www.magedu.com (www.magedu.com)|101.200.188.230|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1150 (1.1K) [image/x-icon]
+Saving to: ‘favicon.ico’
+
+100%[=========================================================================&gt;] 1,150       --.-K/s   <span class="hljs-keyword">in</span> 0s      
+
+2019-06-11 16:30:39 (105 MB/s) - ‘favicon.ico’ saved [1150/1150]
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># cp favicon.ico /var/www/nginx/image/</span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># ll /var/www/nginx/image/</span>
+total 4
+-rw-r--r--. 1 root root 1150 Jun 11 16:30 favicon.ico
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># systemctl restart nginx</span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+
+由于是图片文件， 建议使用浏览器访问， 或者使用 wget 命令下载测试
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># curl --head www.magedu.net/favicon.ico</span>
+HTTP/1.1 200 OK
+Server: nginx/1.16.0
+Date: Tue, 11 Jun 2019 08:40:15 GMT
+Content-Type: image/x-icon
+Content-Length: 1150
+Last-Modified: Tue, 11 Jun 2019 08:30:53 GMT
+Connection: keep-alive
+ETag: <span class="hljs-string">"5cff66bd-47e"</span>
+Accept-Ranges: bytes
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment"># wget www.magedu.net/favicon.ico</span>
+--2019-06-11 16:40:20--  http://www.magedu.net/favicon.ico
+Resolving www.magedu.net (www.magedu.net)... 127.0.0.1
+Connecting to www.magedu.net (www.magedu.net)|127.0.0.1|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1150 (1.1K) [image/x-icon]
+Saving to: ‘favicon.ico.2’
+
+100%[===============================================================================&gt;] 1,150       --.-K/s   <span class="hljs-keyword">in</span> 0s      
+
+2019-06-11 16:40:20 (108 MB/s) - ‘favicon.ico’ saved [1150/1150]
+
+[root@localhost ~]<span class="hljs-comment"># </span>
+[root@localhost ~]<span class="hljs-comment">#</span>
+</div></code></pre>
+
+</body>
+</html>
